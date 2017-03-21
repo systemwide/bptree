@@ -92,7 +92,7 @@ public class Table
      * @param _attribute  the string containing attributes names
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
-     * @param _tuple      the list of tuples containing the data
+     * @param _tuples     the list of tuples containing the data
      */  
     public Table (String _name, String [] _attribute, Class [] _domain, String [] _key,
                   List <Comparable []> _tuples)
@@ -344,8 +344,8 @@ public class Table
      * #usage movie.join ("studioNo", "name", studio)
      *
      * @author Layton Hayes and Jeff Cardinal
-     * @param attribute1  the attributes of this table to be compared (Foreign Key)
-     * @param attribute2  the attributes of table2 to be compared (Primary Key)
+     * @param attributes1  the attributes of this table to be compared (Foreign Key)
+     * @param attributes2  the attributes of table2 to be compared (Primary Key)
      * @param table2      the rhs table in the join operation
      * @return  a table with tuples satisfying the equality predicate
      */
@@ -497,7 +497,7 @@ public class Table
             }
         }
 
-	//find shorter and longer tables, because length of result will be at most length of shorter
+	    //find shorter and longer tables, because length of result will be at most length of shorter
         Table shorter = (this.tuples.size() < table2.tuples.size()) ? this : table2;
         Table longer = (this.tuples.size() >= table2.tuples.size()) ? this : table2;
 
@@ -512,6 +512,7 @@ public class Table
             }
 	    
             Comparable[] tuple2 = new Comparable[0];
+            List<Comparable[]> matchList = new ArrayList<>();
             Boolean found = false;
             for (Comparable[] tuple_2 : longer.tuples) {// search for a matching row in the other table
                 found = true;
@@ -520,27 +521,28 @@ public class Table
                     if(overlap.contains(longer.attribute[i]) && !tuple_2[i].equals(overlapMap.get(this.attribute[i]))) found = false;
                 }
                 if(found){
-                    tuple2 = tuple_2;
-                    break;
+                    matchList.add(tuple_2);
                 }
             }
 
             //if this tuple doesn't have a match in the other table, don't include it in the joined table.
             if(!found) continue;
 
-	    //build new row from matching rows in the tables
-            Comparable[] addition = new Comparable[attrs.size()];
-            index = 0;
-            for (int i = 0; i < tuple.length; i++) {
-                addition[index] = tuple[i];
-                index++;
+            for(Comparable[] match : matchList) {
+                //build new rows from matching rows in the tables
+                Comparable[] addition = new Comparable[attrs.size()];
+                index = 0;
+                for (int i = 0; i < tuple.length; i++) {
+                    addition[index] = tuple[i];
+                    index++;
+                }
+                for (int i = 0; i < match.length && index < attrs.size(); i++) {
+                    addition[index] = match[i];
+                    index++;
+                }
+                //add the row to the new table
+                rows.add(addition);
             }
-            for (int i = 0; i < tuple2.length && index < attrs.size(); i++) {
-                addition[index] = tuple2[i];
-                index++;
-            }
-	    //add the row to the new table
-            rows.add(addition);
         }
 
         //new attributes and domains
