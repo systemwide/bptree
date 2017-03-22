@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  * @file  MovieDB.java
  *
@@ -19,6 +18,7 @@ import java.util.Random;
 class MovieDB
 {
     /*************************************************************************************
+	
      * Main method for creating, populating and querying a Movie Database.
      * @param args  the command-line arguments
      */
@@ -144,171 +144,139 @@ class MovieDB
         studio.save ();
 
         movieStar.printIndex ();
-
-        //--------------------- project: title year
-
-        out.println ();
-        Table t_project = movie.project ("title year");
-        t_project.print ();
-        t_project.save();
-
-        //--------------------- project: non-existent arguments
-        /**
-         *@author Ben Rotolo
-         *
-         */
-        out.println ("Testing made up terms");
-        Table t_project2 = movie.project ("made up terms");
-        t_project2.print ();
         
-        //--------------------- project: no arguments
+        /**************************** BEGIN TEST CASES ****************************/
         /**
-         *@author Ben Rotolo
-         *
+         * @author - Ben Rotolo
+         * for modified test cases from original MovieDB
+         */           
+       
+        /**
+         * Select case a. Select without any where clause, i.e., no attributes specified in the method
          */
-        out.println ("Testing no terms");
-        Table t_project3 = movie.project ("");
-        t_project3.print ();
-
-
         out.println();
-        Table t_select_no_argument = movie.select();
-        t_select_no_argument.print();
-        t_select_no_argument.save();
+        Table select_case_a = movie.select();
+        select_case_a.print();
+        select_case_a.save (); 
         
-        
-        //--------------------- select: equals, &&
-
-        out.println ();
-        Table t_select = movie.select (t -> t[movie.col("title")].equals ("Film_22") &&
-                                            t[movie.col("year")].equals (1977));
-        t_select.print ();
-        t_select.save();
-        
-        
-        //--------------------- select: equals, ||
         /**
-         *@author Ben Rotolo
-         *
+         * Select case b. Select with where clause – a predicate string 
          */
-        out.println ("Testing Select with .equals and || ");
         out.println ();
-        Table t_select_or = movie.select (t -> t[movie.col("title")].equals ("Film_44") ||
-                                             t[movie.col("title")].equals ("Film_55")) ;
-        t_select_or.print ();
-        t_select_or.save();
+        Table select_case_b = movie.select (t -> t[movie.col("title")].equals ("Film_22"));
+        select_case_b.print ();
+        select_case_b.save ();
         
-        //--------------------- select: !equals
+
         /**
-         *@author Ben Rotolo
-         *
+         * Select case c Select with key given as attribute
          */
-        out.println ("Testing Select with !equals");
         out.println ();
-        Table t_select_not = movie.select (t -> !t[movie.col("title")].equals ("Star_Wars"));
-                                            
-        t_select_not.print ();
-        t_select_not.save();
+        Table select_case_c = movieStar.select (new KeyType ("StarName_25"));
+        select_case_c.print ();
+        select_case_c.save ();
         
-        //--------------------- select: <
-
+        
+        /**
+         * Project case a: Project on a key column
+         */
         out.println ();
-        Table t_select2 = movie.select (t -> (Integer) t[movie.col("year")] < 1980);
-        t_select2.print ();
-
-        //--------------------- indexed select: key
-
+        Table project_case_a = movieStar.project ("name");
+        project_case_a.print ();
+        project_case_a.save ();
+        
+        /**
+         * Project case b: Project on a non-key column: this should eliminate the duplicates 
+         * if duplicates are present in the table
+         */
+        out.println();
+        Table project_case_b = movie.project ("genre");
+        project_case_b.print ();
+        project_case_b.save ();
+        
+      //--------------------- equi-join: movie JOIN studio ON studioName = name
+        /**
+         * Join case a: Equi join – giving table column names as attributes
+         */
         out.println ();
-        Table t_iselect = movieStar.select (new KeyType ("StarName_25"));
-        t_iselect.print ();
+        Table join_case_a = movie.join ("studioName", "name", studio);
+        join_case_a.print ();
+        join_case_a.save ();
         
-        //--------------------- select with blank key
-        /**
-         *@author Ben Rotolo
-         *
-         */
-        out.println ("Select with a  ' ' for key...");
-        Table t_iselect_blank = movieStar.select (new KeyType (" "));
-        t_iselect_blank.print ();
-        
-        //--------------------- select without args
-        /**
-         *@author Ben Rotolo
-         *
-         */
-        out.println ("Select with out arguments...");
-        Table t_iselect_no_arg = movieStar.select ();
-        t_iselect_no_arg.print ();
 
-     
-        //--------------------- union: movie UNION cinema
-
+        /**
+         *  Join case b - natural join
+         */
         out.println ();
-        Table t_union = movie.union (cinema);
-        t_union.print ();
+        Table join_case_b = movie.join (cinema);
+        join_case_b.print ();
+        join_case_b.save ();
         
-        //--------------------- union: movie UNION cinema
-        /**
-         *@author Ben Rotolo
-         *
-         */
-        out.println("self-Union movie with movie");
-        Table t_union_self = movie.union(movie);
-        t_union_self.print();
-
         
-        //--------------------- union: movie UNION movie
         /**
-         *@author Ben Rotolo
-         *
+         * Join case c - Cross product – natural join on two tables without any 
+         * common attributes will give a cross product of the two tables
          */
-        out.println("self-Union movie with movie");
-        Table t_union_self1 = movie.union(movie);
-        t_union_self1.print();
+        out.println("Cross Product: movie and movieStar have no common attributes");
+        Table join_case_c = movie.join(movieStar);
+        join_case_c.print();
+        join_case_c.save();       
+      
+        /**
+         * union case a: simple union operation
+         */
+        out.println ();
+        Table union_case_a = movie.union (cinema);
+        union_case_a.print ();
+        union_case_a.save ();
 
         //--------------------- minus: movie MINUS cinema
-
-        out.println ();
-        Table t_minus = movie.minus (cinema);
-        t_minus.print ();
-        
-        //--------------------- minus: movie MINUS movie
         /**
-         *@author Ben Rotolo
-         *
+         * minus case a: simple minus operation
          */
-        out.println ("Movie minus self...");
-        Table self_minus = movie.minus (movie);
-        self_minus.print ();
-
-        
-        //--------------------- equi-join: movie JOIN studio ON studioName = name
-
         out.println ();
-        Table t_join = movie.join ("studioName", "name", studio);
-        t_join.print ();
-
+        Table minus_case_a = movie.minus (cinema);
+        minus_case_a.print ();
+        minus_case_a.save ();
         
-        //--------------------- natural join: movie JOIN studio
-
-        out.println ();
-        Table t_join2 = movie.join (cinema);
-        t_join2.print ();
         
-        //--------------------- natural join: join on self.
-        /**
-         *@author Ben Rotolo
-         *
-         */
-        out.println ("Movie join with movie");
-        Table self_join = movie.join (movie);
-        self_join.print ();
-        
-      //---------------------- cross product of two disparate tables: move and movieStar  
-        
-        out.println("Cross Product: movie and movieStar have no common attributes");
-        Table cross_product = movie.join(movieStar);
-        cross_product.print();
+//        /******************************* EXTRA TEST CASES *************************/
+//        //--------------------- select: !equals
+//        /**
+//         *@author Ben Rotolo
+//         *
+//         */
+//        out.println ("Testing Select with !equals");
+//        out.println ();
+//        Table select_case_b_not = movie.select (t -> t[movie.col("title")].equals ("Star_Wars"));
+//                                            
+//        select_case_b_not.print ();
+//        select_case_b_not.save ();
+//        
+//        //--------------------- select: <
+//
+//        out.println ();
+//        Table select_case_b2 = movie.select (t -> (Integer) t[movie.col("year")] < 1980);
+//        select_case_b2.print ();
+//
+//        
+//        //--------------------- select with blank key
+//        /**
+//         *@author Ben Rotolo
+//         *
+//         */
+//        out.println ("Select with a  ' ' for key...");
+//        Table select_case_c_blank = movieStar.select (new KeyType (" "));
+//        select_case_c_blank.print ();
+//        
+//        //--------------------- select without args
+//        /**
+//         *@author Ben Rotolo
+//         *
+//         */
+//        out.println ("Select with out arguments...");
+//        Table select_case_c_no_arg = movieStar.select ();
+//        select_case_c_no_arg.print ();
 
     } // main
 

@@ -24,7 +24,7 @@ public class Table
 {
     /** Relative path for storage directory
      */
-    private static final String DIR = "store" + File.separator;
+    //private static final String DIR = "store" + File.separator;
 
     /** Filename extension for database files
      */
@@ -665,7 +665,7 @@ public class Table
     {
         Table tab = null;
         try {
-            ObjectInputStream ois = new ObjectInputStream (new FileInputStream (DIR + name + EXT));
+            ObjectInputStream ois = new ObjectInputStream (new FileInputStream (name + EXT));
             tab = (Table) ois.readObject ();
             ois.close ();
         } catch (IOException ex) {
@@ -684,7 +684,7 @@ public class Table
     public void save ()
     {
         try {
-            ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (DIR + name + EXT));
+            ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (name + EXT));
             oos.writeObject (this);
             oos.close ();
         } catch (IOException ex) {
